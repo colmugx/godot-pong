@@ -42,16 +42,13 @@ jobs:
           repository: emscripten-core/emsdk
           path: emsdk
 
-      - name: Install emsdk
+      - name: Compilation
         run: |
           cd emsdk
           git pull
           ./emsdk install ${{env.EMSDK_VERSION}}
           ./emsdk activate ${{env.EMSDK_VERSION}}
           source ./emsdk_env.sh
-
-      - name: Compilation
-        run: |
           mkdir -v -p ${{env.TARGET_PATH}}
           cd godot-cpp
           scons platform=javascript generate_bindings=yes use_custom_api_file=yes custom_api_file=../api.json target=release -j $(nproc)
