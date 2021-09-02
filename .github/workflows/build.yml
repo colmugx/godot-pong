@@ -1,0 +1,113 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT: project
+  TARGET_PATH: project/bin/javascript/
+  TARGET_NAME: libgodotpong
+  TARGET: release
+  EMSDK_VERSION: 2.0.17
+  GODOT_VERSION: 3.3
+
+jobs:
+  compilation:
+    name: compilation
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+        with:
+            lfs: true
+            submodules: recursive
+
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Install scons
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+
+      - name: Clone emsdk
+        uses: actions/checkout@v2
+        with:
+          repository: emscripten-core/emsdk
+          path: emsdk
+
+      - name: Install emsdk
+        run: |
+          cd emsdk
+          git pull
+          ./emsdk install ${{env.EMSDK_VERSION}}
+          ./emsdk activate ${{env.EMSDK_VERSION}}
+          source ./emsdk_env.sh
+
+      - name: Compilation
+        run: |
+          mkdir -v -p ${{env.TARGET_PATH}}
+          cd godot-cpp
+          scons platform=javascript generate_bindings=yes use_custom_api_file=yes custom_api_file=../api.json target=release -j $(nproc)
+          cd ..
+          scons platform=javascript target=release target_name=${{env.TARGET_NAME}}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: javascript
+          path: ${{env.TARGET_PATH}}
+
+  deploy:
+    name: deploy
+    runs-on: "ubuntu-latest"
+    needs: [compilation]
+    container:
+      image: barichello/godot-ci:3.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
+
+      - name: Copy Library
+        run: |
+          mkdir -v -p ${{env.TARGET_PATH}}
+          cp javascript/${{env.TARGET_NAME}}.wasm ${{env.TARGET_PATH}}
+
+      - name: Setup
+        run: |
+          mkdir -v -p ~/.local/share/godot/templates
+          mv /root/.local/share/godot/templates/${GODOT_VERSION}.stable ~/.local/share/godot/templates/${GODOT_VERSION}.stable
+
+      - name: Build
+        run: |
+          mkdir -v -p dist
+          cd $PROJECT
+          godot -v --export "HTML5" ../dist/index.html
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
+
+      - name: Install rsync
+        run: |
+          apt-get update && apt-get install -y rsync
+
+      - name: Deploy to GitHub Pages 🚀
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: dist
