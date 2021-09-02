@@ -51,6 +51,7 @@ jobs:
           source ./emsdk_env.sh
           cd ..
           mkdir -v -p ${{env.TARGET_PATH}}
+          cd godot-cpp
           scons platform=javascript generate_bindings=yes use_custom_api_file=yes custom_api_file=../api.json target=release -j $(nproc)
           cd ..
           scons platform=javascript target=release target_name=${{env.TARGET_NAME}}
