@@ -28,7 +28,7 @@ namespace pong
 
         void PhysicsProcess(double delta);
 
-        void Reset(double dir);
+        void Reset(double x, double y = 0.3);
     };
 
 }

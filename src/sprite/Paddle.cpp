@@ -1,4 +1,4 @@
-#include "paddle.h"
+#include "Paddle.h"
 
 using namespace godot;
 using namespace pong;
@@ -27,15 +27,6 @@ void Paddle::Ready()
 void Paddle::PhysicsProcess(const double delta)
 {
     Vector2 *vec = new Vector2(0.0, 0.0);
-
-    if (_input->is_action_pressed("ui_right"))
-    {
-        ++vec->x;
-    }
-    if (_input->is_action_pressed("ui_left"))
-    {
-        --vec->x;
-    }
 
     if (_input->is_action_pressed("ui_down"))
     {

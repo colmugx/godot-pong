@@ -131,7 +131,7 @@ env.Append(LIBS=[cpp_library])
 
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 env.Append(CPPPATH=['src/'])
-sources = Glob('src/*.cpp')
+sources = [Glob('src/**/*.cpp'), "src/gdlibrary.cpp"]
 
 library = env.SharedLibrary(target=env['target_path'] + env['target_name'] , source=sources)
 

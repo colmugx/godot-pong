@@ -1,4 +1,4 @@
-#include "ball.h"
+#include "Ball.h"
 
 using namespace godot;
 using namespace pong;
@@ -28,7 +28,6 @@ void Ball::_init()
 
 void Ball::Ready()
 {
-    Reset(-1.0);
 }
 
 void Ball::PhysicsProcess(const double delta)
@@ -40,10 +39,11 @@ void Ball::PhysicsProcess(const double delta)
     }
 }
 
-void Ball::Reset(const double dir)
+void Ball::Reset(const double x, const double y)
 {
     Vector2 ScreenSize = get_viewport_rect().size;
     set_position(Vector2(ScreenSize.width / 2, ScreenSize.height / 2));
 
-    _velocity->x = dir;
+    _velocity->x = x;
+    _velocity->y = y;
 }

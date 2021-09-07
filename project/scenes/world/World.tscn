@@ -1,0 +1,100 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://sprites/Ball.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/ui/HUD.tscn" type="PackedScene" id=2]
+[ext_resource path="res://sprites/Wall.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/world/World.gdns" type="Script" id=4]
+[ext_resource path="res://sprites/Goal.tscn" type="PackedScene" id=5]
+[ext_resource path="res://sprites/Paddle.tscn" type="PackedScene" id=6]
+[ext_resource path="res://sprites/AI.gdns" type="Script" id=7]
+
+[sub_resource type="Animation" id=2]
+resource_name = "show"
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:offset:y")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( -60, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.5 )
+}
+
+[sub_resource type="Animation" id=1]
+resource_name = "fadeIn"
+tracks/0/type = "bezier"
+tracks/0/path = NodePath(".:color:a")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0, 0.5, 0, 0, 0.5, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.3 )
+}
+
+[node name="World" type="Node2D"]
+script = ExtResource( 4 )
+
+[node name="Ball" parent="." instance=ExtResource( 1 )]
+position = Vector2( 512, 300 )
+speed = 500.0
+
+[node name="LeftPaddle" parent="." instance=ExtResource( 6 )]
+position = Vector2( 76.8499, 303.557 )
+speed = 400.0
+
+[node name="RightPaddle" parent="." instance=ExtResource( 6 )]
+position = Vector2( 956.781, 302.789 )
+script = ExtResource( 7 )
+speed = 300.0
+
+[node name="LeftGoal" parent="." instance=ExtResource( 5 )]
+position = Vector2( -10, 300 )
+
+[node name="RightGoal" parent="." instance=ExtResource( 5 )]
+position = Vector2( 1034, 300 )
+
+[node name="TopWall" parent="." instance=ExtResource( 3 )]
+position = Vector2( 512, -5 )
+
+[node name="BottomWall" parent="." instance=ExtResource( 3 )]
+position = Vector2( 512, 605 )
+
+[node name="HUD" parent="." instance=ExtResource( 2 )]
+offset = Vector2( 0, -60 )
+transform = Transform2D( 1, 0, 0, 1, 0, -60 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HUD"]
+anims/show = SubResource( 2 )
+
+[node name="Mask" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 1024.0
+margin_bottom = 600.0
+color = Color( 0.0627451, 0.0901961, 0.0823529, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Mask"]
+anims/fadeIn = SubResource( 1 )
+
+[node name="CountDownTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="CountDownLabel" type="Label" parent="."]
+visible = false
+margin_right = 40.0
+margin_bottom = 14.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="body_exited" from="LeftGoal" to="." method="_on_LeftGoal_exited"]
+[connection signal="body_exited" from="RightGoal" to="." method="_on_RightGoal_exited"]
+[connection signal="animation_finished" from="Mask/AnimationPlayer" to="." method="_on_fadeIn_finished"]
+[connection signal="timeout" from="CountDownTimer" to="." method="_on_countDown_timeout"]
