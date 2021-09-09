@@ -10,9 +10,9 @@ config_version=4
 
 [application]
 
-config/name="Project"
+config/name="godot-pong"
 run/main_scene="res://scenes/ui/TitleScreen.tscn"
-config/icon="res://icon.png"
+config/icon="res://assets/ball.png"
 
 [display]
 
